@@ -1,0 +1,50 @@
+### AI 接口测试（SSE 流式响应）
+### 先通过 auth.http 登录获取 token
+
+@token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxNzU1NTA5NjUwNDY3IiwiZW1haWwiOiJ4eWhAcXEuY29tIiwiZXhwIjoxNzc1Mzg5NDg3fQ.pKlQxDsDp7Md6eBIVYjFnXdcpcIxQQHtiB8XGPSOaec
+
+### 从零 AI 生成简历
+### 响应为 SSE 流，每条 data: {...} 为一个 section 完成
+### 同时会自动写入数据库
+POST http://localhost:8312/ai/generate
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+    "resume_id": 1,
+    "target_role": "高级后端工程师",
+    "raw_info": {
+        "work_exp": "在字节跳动做了3年后端开发，主要负责推荐系统的后端服务，用Python和Go写过微服务，熟悉Redis/MySQL/Kafka",
+        "education": "北京大学计算机科学与技术本科，2022年毕业",
+        "skills": "Python Go MySQL Redis Kafka Docker Kubernetes",
+        "projects": "做过一个实时数据处理平台，日处理量1亿条，还做过用户行为分析系统"
+    },
+    "sections": ["basic_info", "summary", "work_exp", "education", "skills", "projects"]
+}
+
+###
+
+### 针对 JD 优化简历（优化全部 section）
+POST http://localhost:8312/ai/jd-optimize
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+    "resume_id": 1,
+    "jd_text": "岗位：高级后端工程师\n\n职责：\n1. 负责核心交易系统的设计和开发\n2. 参与系统架构设计，解决高并发、高可用问题\n3. 优化数据库性能，保障系统稳定运行\n\n要求：\n1. 5年以上后端开发经验\n2. 精通Go/Python，熟悉微服务架构\n3. 熟悉MySQL、Redis，有高并发系统设计经验\n4. 有Kafka等消息队列使用经验优先"
+}
+
+###
+
+### 只优化指定 section（summary + work_exp）
+POST http://localhost:8312/ai/jd-optimize
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+    "resume_id": 1,
+    "jd_text": "岗位：技术负责人\n职责：负责团队管理和技术架构...",
+    "section_types": ["summary", "work_exp"]
+}
+
+###

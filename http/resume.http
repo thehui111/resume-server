@@ -1,0 +1,136 @@
+### 简历 CRUD 接口测试
+### 先通过 auth.http 登录获取 token，替换下方 {{token}}
+
+@token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxNzU1NTA5NjUwNDY3IiwiZW1haWwiOiJ4eWhAcXEuY29tIiwiZXhwIjoxNzc1Mzg5NDg3fQ.pKlQxDsDp7Md6eBIVYjFnXdcpcIxQQHtiB8XGPSOaec
+
+### 创建简历
+POST http://localhost:8312/resume/create
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+    "title": "ai phd candidate",
+    "target_role": "ai phd candidate"
+}
+
+###
+
+### 查询简历详情（含所有 section）
+POST http://localhost:8312/resume/detail
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+    "id": 1
+}
+
+###
+
+### 我的简历列表
+POST http://localhost:8312/resume/list
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+    "page": 1,
+    "page_size": 20
+}
+
+###
+
+### 更新简历基础信息
+POST http://localhost:8312/resume/update
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+    "id": 1,
+    "title": "高级后端工程师简历",
+    "target_role": "高级后端工程师"
+}
+
+###
+
+### 保存 basic_info section
+POST http://localhost:8312/resume/section/save
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+    "resume_id": 1,
+    "section_type": "basic_info",
+    "order_index": 0,
+    "content": {
+        "name": "张三",
+        "email": "zhangsan@example.com",
+        "phone": "13800138312",
+        "location": "北京",
+        "linkedin": "",
+        "github": "github.com/zhangsan"
+    }
+}
+
+###
+
+### 保存 work_exp section
+POST http://localhost:8312/resume/section/save
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+    "resume_id": 1,
+    "section_type": "work_exp",
+    "order_index": 2,
+    "content": [
+        {
+            "company": "字节跳动",
+            "title": "高级后端工程师",
+            "start": "2022-03",
+            "end": "2024-06",
+            "description": "- 主导推荐系统重构，将 P99 延迟从 800ms 降至 200ms\n- 设计并落地分布式限流方案，日处理请求 2 亿次"
+        }
+    ]
+}
+
+###
+
+### 删除 section
+POST http://localhost:8312/resume/section/delete
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+    "resume_id": 1,
+    "section_type": "projects"
+}
+
+###
+
+### 模板列表
+GET http://localhost:8312/resume/templates
+Authorization: Bearer {{token}}
+
+###
+
+### 导出 PDF
+POST http://localhost:8312/resume/export/pdf
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+    "resume_id": 1,
+    "template_name": "default.html"
+}
+
+###
+
+### 删除简历
+POST http://localhost:8312/resume/delete
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+    "id": 1
+}
+
+###

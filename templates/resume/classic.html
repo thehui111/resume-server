@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<style>
+  @font-face {
+    font-family: "STHeiti";
+    src: url('../fonts/STHeiti-Medium.ttc') format('truetype');
+    font-weight: normal;
+    font-style: normal;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: "STHeiti", "PingFang SC", Arial, sans-serif;
+    font-size: 10.5pt;
+    color: #111;
+    padding: 32px 44px;
+    line-height: 1.6;
+    background: #fff;
+  }
+
+  /* 顶部姓名区 */
+  .header { position: relative; text-align: center; margin-bottom: 18px; border-bottom: 3px solid #111; padding-bottom: 14px; }
+  .header h1 { font-size: 22pt; font-weight: 700; letter-spacing: 2px; margin-bottom: 6px; }
+  .contact-line { font-size: 9.5pt; color: #333; }
+  .contact-line span { margin: 0 10px; }
+  .contact-line span:first-child { margin-left: 0; }
+
+  /* section */
+  .section { margin-bottom: 16px; }
+  .section-title {
+    font-size: 11pt;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    color: #8b0000;
+    border-bottom: 1px solid #ccc;
+    padding-bottom: 3px;
+    margin-bottom: 10px;
+  }
+
+  /* 条目 */
+  .item { margin-bottom: 11px; }
+  .item-row { display: flex; justify-content: space-between; align-items: baseline; }
+  .item-left { font-weight: 700; font-size: 10.5pt; }
+  .item-right { font-size: 9.5pt; color: #555; white-space: nowrap; }
+  .item-sub { font-style: italic; font-size: 10pt; color: #444; margin-top: 1px; }
+  .item-desc { margin-top: 5px; font-size: 10pt; color: #222; white-space: pre-line; }
+
+  /* 技能 */
+  .skills-row { margin-bottom: 5px; font-size: 10pt; }
+  .skills-label { font-weight: 700; }
+  .skills-val { color: #333; }
+
+  /* 项目技术栈 */
+  .tech { font-size: 9.5pt; color: #666; margin-top: 3px; font-style: italic; }
+
+  /* 个人总结 */
+  .summary-text { font-size: 10pt; color: #333; line-height: 1.7; }
+  /* 头像 */
+  .avatar { position: absolute; top: 0; right: 0; width: 80px; height: 80px; border-radius: 50%; object-fit: cover; }
+</style>
+</head>
+<body>
+
+{% set basic = sections.get('basic_info', {}) %}
+<div class="header">
+  {% if basic.get('avatar_url') %}
+  <img class="avatar" src="{{ basic.avatar_url }}" alt="avatar" />
+  {% endif %}
+  <h1>{{ basic.get('name', '') }}</h1>
+  <div class="contact-line">
+    {% if basic.get('email') %}<span>{{ basic.email }}</span>{% endif %}
+    {% if basic.get('phone') %}<span>{{ basic.phone }}</span>{% endif %}
+    {% if basic.get('location') %}<span>{{ basic.location }}</span>{% endif %}
+    {% if basic.get('linkedin') %}<span>{{ basic.linkedin }}</span>{% endif %}
+    {% if basic.get('github') %}<span>{{ basic.github }}</span>{% endif %}
+  </div>
+</div>
+
+{% set summary = sections.get('summary', {}) %}
+{% if summary and summary.get('text') %}
+<div class="section">
+  <div class="section-title">Summary</div>
+  <div class="summary-text">{{ summary.text }}</div>
+</div>
+{% endif %}
+
+{% set work_exp = sections.get('work_exp', []) %}
+{% if work_exp %}
+<div class="section">
+  <div class="section-title">Experience</div>
+  {% for exp in work_exp %}
+  <div class="item">
+    <div class="item-row">
+      <span class="item-left">{{ exp.get('company', '') }}</span>
+      <span class="item-right">{{ exp.get('start', '') }} — {{ exp.get('end', '至今') }}</span>
+    </div>
+    <div class="item-sub">{{ exp.get('title', '') }}</div>
+    {% if exp.get('description') %}
+    <div class="item-desc">{{ exp.description }}</div>
+    {% endif %}
+  </div>
+  {% endfor %}
+</div>
+{% endif %}
+
+{% set projects = sections.get('projects', []) %}
+{% if projects %}
+<div class="section">
+  <div class="section-title">Projects</div>
+  {% for proj in projects %}
+  <div class="item">
+    <div class="item-row">
+      <span class="item-left">{{ proj.get('name', '') }}</span>
+      {% if proj.get('role') %}<span class="item-right">{{ proj.role }}</span>{% endif %}
+    </div>
+    {% if proj.get('description') %}
+    <div class="item-desc">{{ proj.description }}</div>
+    {% endif %}
+    {% if proj.get('tech_stack') %}
+    <div class="tech">Tech: {{ proj.tech_stack | join(' · ') }}</div>
+    {% endif %}
+  </div>
+  {% endfor %}
+</div>
+{% endif %}
+
+{% set education = sections.get('education', []) %}
+{% if education %}
+<div class="section">
+  <div class="section-title">Education</div>
+  {% for edu in education %}
+  <div class="item">
+    <div class="item-row">
+      <span class="item-left">{{ edu.get('school', '') }}</span>
+      <span class="item-right">{{ edu.get('start', '') }} — {{ edu.get('end', '') }}</span>
+    </div>
+    <div class="item-sub">{{ edu.get('degree', '') }} · {{ edu.get('major', '') }}</div>
+  </div>
+  {% endfor %}
+</div>
+{% endif %}
+
+{% set skills = sections.get('skills', {}) %}
+{% if skills %}
+<div class="section">
+  <div class="section-title">Skills</div>
+  {% if skills.get('languages') %}
+  <div class="skills-row">
+    <span class="skills-label">Languages：</span>
+    <span class="skills-val">{{ skills.languages | join(' · ') }}</span>
+  </div>
+  {% endif %}
+  {% if skills.get('frameworks') %}
+  <div class="skills-row">
+    <span class="skills-label">Frameworks：</span>
+    <span class="skills-val">{{ skills.frameworks | join(' · ') }}</span>
+  </div>
+  {% endif %}
+  {% if skills.get('tools') %}
+  <div class="skills-row">
+    <span class="skills-label">Tools：</span>
+    <span class="skills-val">{{ skills.tools | join(' · ') }}</span>
+  </div>
+  {% endif %}
+</div>
+{% endif %}
+
+</body>
+</html>
