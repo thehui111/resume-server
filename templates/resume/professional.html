@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<style>
+  @font-face {
+    font-family: "NotoSansSC";
+    src: url('../fonts/NotoSansSC-Regular.woff2') format('woff2');
+    font-weight: normal;
+    font-style: normal;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: "NotoSansSC", "PingFang SC", Arial, sans-serif;
+    font-size: 10.5pt;
+    color: #2c2c2c;
+    line-height: 1.55;
+  }
+  .topbar {
+    background: #1e3a5f;
+    color: #fff;
+    padding: 24px 40px;
+  }
+  .topbar h1 {
+    font-size: 20pt;
+    font-weight: 500;
+    margin-bottom: 6px;
+  }
+  .topbar .avatar {
+    width: 72px;
+    height: 72px;
+    border-radius: 50%;
+    object-fit: cover;
+    float: right;
+    border: 2px solid rgba(255,255,255,0.3);
+  }
+  .topbar .contact {
+    font-size: 9.5pt;
+    color: #cbd5e1;
+  }
+  .topbar .contact span { margin-right: 14px; }
+  .content { padding: 22px 40px 36px; }
+  .section { margin-bottom: 18px; }
+  .section-title {
+    font-size: 11pt;
+    font-weight: 700;
+    color: #1e3a5f;
+    border-bottom: 1.5px solid #1e3a5f;
+    padding-bottom: 4px;
+    margin-bottom: 10px;
+  }
+  .summary-text { color: #4a4a4a; white-space: pre-line; }
+  .item { margin-bottom: 11px; }
+  .item-row { display: flex; justify-content: space-between; align-items: baseline; }
+  .item-title { font-weight: 700; color: #1f2937; }
+  .item-sub { font-size: 9.5pt; color: #475569; margin-top: 1px; }
+  .item-date { font-size: 9pt; color: #64748b; white-space: nowrap; margin-left: 8px; }
+  .item-desc { margin-top: 4px; color: #374151; white-space: pre-line; font-size: 10pt; }
+  .skills-row { margin-bottom: 5px; font-size: 10pt; }
+  .skills-label { font-weight: 700; color: #1e3a5f; display: inline; }
+  .skills-val { color: #374151; display: inline; }
+  .tech { font-size: 9pt; color: #64748b; margin-top: 3px; }
+</style>
+</head>
+<body>
+
+{% set basic = sections.get('basic_info', {}) %}
+<div class="topbar">
+  {% if basic.get('avatar_url') %}
+  <img class="avatar" src="{{ basic.avatar_url }}" alt="avatar" />
+  {% endif %}
+  <h1>{{ basic.get('name', '') }}</h1>
+  <div class="contact">
+    {% if basic.get('email') %}<span>{{ basic.email }}</span>{% endif %}
+    {% if basic.get('phone') %}<span>{{ basic.phone }}</span>{% endif %}
+    {% if basic.get('location') %}<span>{{ basic.location }}</span>{% endif %}
+  </div>
+</div>
+
+<div class="content">
+
+{% set summary = sections.get('summary', {}) %}
+{% if summary and summary.get('text') %}
+<div class="section">
+  <div class="section-title">个人总结</div>
+  <div class="summary-text">{{ summary.text }}</div>
+</div>
+{% endif %}
+
+{% set work_exp = sections.get('work_exp', []) %}
+{% if work_exp %}
+<div class="section">
+  <div class="section-title">工作经历</div>
+  {% for exp in work_exp %}
+  <div class="item">
+    <div class="item-row">
+      <span class="item-title">{{ exp.get('company', '') }}</span>
+      <span class="item-date">{{ exp.get('start', '') }} — {{ exp.get('end', '至今') }}</span>
+    </div>
+    <div class="item-sub">{{ exp.get('title', '') }}</div>
+    {% if exp.get('description') %}
+    <div class="item-desc">{{ exp.description }}</div>
+    {% endif %}
+  </div>
+  {% endfor %}
+</div>
+{% endif %}
+
+{% set projects = sections.get('projects', []) %}
+{% if projects %}
+<div class="section">
+  <div class="section-title">项目经历</div>
+  {% for proj in projects %}
+  <div class="item">
+    <div class="item-row">
+      <span class="item-title">{{ proj.get('name', '') }}</span>
+      {% if proj.get('role') %}<span class="item-sub">{{ proj.role }}</span>{% endif %}
+    </div>
+    {% if proj.get('description') %}
+    <div class="item-desc">{{ proj.description }}</div>
+    {% endif %}
+    {% if proj.get('tech_stack') %}
+    <div class="tech">技术栈：{{ proj.tech_stack | join('、') }}</div>
+    {% endif %}
+  </div>
+  {% endfor %}
+</div>
+{% endif %}
+
+{% set education = sections.get('education', []) %}
+{% if education %}
+<div class="section">
+  <div class="section-title">教育背景</div>
+  {% for edu in education %}
+  <div class="item">
+    <div class="item-row">
+      <span class="item-title">{{ edu.get('school', '') }}</span>
+      <span class="item-date">{{ edu.get('start', '') }} — {{ edu.get('end', '') }}</span>
+    </div>
+    <div class="item-sub">{{ edu.get('degree', '') }} · {{ edu.get('major', '') }}</div>
+  </div>
+  {% endfor %}
+</div>
+{% endif %}
+
+{% set skills = sections.get('skills', {}) %}
+{% if skills %}
+<div class="section">
+  <div class="section-title">技能</div>
+  {% if skills.get('languages') %}
+  <div class="skills-row">
+    <span class="skills-label">编程语言：</span>
+    <span class="skills-val">{{ skills.languages | join('、') }}</span>
+  </div>
+  {% endif %}
+  {% if skills.get('frameworks') %}
+  <div class="skills-row">
+    <span class="skills-label">框架/库：</span>
+    <span class="skills-val">{{ skills.frameworks | join('、') }}</span>
+  </div>
+  {% endif %}
+  {% if skills.get('tools') %}
+  <div class="skills-row">
+    <span class="skills-label">工具/平台：</span>
+    <span class="skills-val">{{ skills.tools | join('、') }}</span>
+  </div>
+  {% endif %}
+</div>
+{% endif %}
+
+</div>
+
+</body>
+</html>

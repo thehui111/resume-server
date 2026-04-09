@@ -135,6 +135,11 @@ class ExportPdfReq(BaseModel):
 _TEMPLATE_FILE_MAP = {
     "默认模板": "default.html",
     "Classic 经典": "classic.html",
+    "Clean 清新": "clean.html",
+    "Minimal 极简": "minimal.html",
+    "Professional 商务": "professional.html",
+    "Modern 现代": "modern.html",
+    "Creative 创意": "creative.html",
 }
 
 

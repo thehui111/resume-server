@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<style>
+  @font-face {
+    font-family: "NotoSansSC";
+    src: url('../fonts/NotoSansSC-Regular.woff2') format('woff2');
+    font-weight: normal;
+    font-style: normal;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: "NotoSansSC", "PingFang SC", Arial, sans-serif;
+    font-size: 10pt;
+    color: #000;
+    padding: 40px 48px;
+    line-height: 1.45;
+  }
+  h1 {
+    font-size: 18pt;
+    font-weight: 400;
+    margin-bottom: 6px;
+    letter-spacing: 1px;
+  }
+  .contact {
+    font-size: 9pt;
+    color: #555;
+    margin-bottom: 24px;
+  }
+  .contact span { margin-right: 14px; }
+  .section { margin-bottom: 20px; }
+  .section-title {
+    font-size: 9pt;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    border-bottom: 1px solid #000;
+    padding-bottom: 3px;
+    margin-bottom: 10px;
+  }
+  .item { margin-bottom: 10px; }
+  .item-row { display: flex; justify-content: space-between; }
+  .item-title { font-weight: 600; }
+  .item-date { font-size: 9pt; color: #666; }
+  .item-sub { font-size: 9.5pt; color: #444; margin-top: 1px; }
+  .item-desc { margin-top: 3px; color: #333; white-space: pre-line; font-size: 9.5pt; }
+  .skills-row { font-size: 9.5pt; margin-bottom: 3px; }
+  .skills-label { font-weight: 600; }
+  .avatar { width: 64px; height: 64px; border-radius: 50%; object-fit: cover; float: right; margin-left: 14px; margin-bottom: 10px; }
+  .tech { font-size: 9pt; color: #666; margin-top: 2px; }
+</style>
+</head>
+<body>
+
+{% set basic = sections.get('basic_info', {}) %}
+{% if basic.get('avatar_url') %}
+<img class="avatar" src="{{ basic.avatar_url }}" alt="avatar" />
+{% endif %}
+<h1>{{ basic.get('name', '') }}</h1>
+<div class="contact">
+  {% if basic.get('email') %}<span>{{ basic.email }}</span>{% endif %}
+  {% if basic.get('phone') %}<span>{{ basic.phone }}</span>{% endif %}
+  {% if basic.get('location') %}<span>{{ basic.location }}</span>{% endif %}
+</div>
+
+{% set summary = sections.get('summary', {}) %}
+{% if summary and summary.get('text') %}
+<div class="section">
+  <div class="section-title">Summary</div>
+  <div class="item-desc">{{ summary.text }}</div>
+</div>
+{% endif %}
+
+{% set work_exp = sections.get('work_exp', []) %}
+{% if work_exp %}
+<div class="section">
+  <div class="section-title">Experience</div>
+  {% for exp in work_exp %}
+  <div class="item">
+    <div class="item-row">
+      <span class="item-title">{{ exp.get('company', '') }}</span>
+      <span class="item-date">{{ exp.get('start', '') }} — {{ exp.get('end', '至今') }}</span>
+    </div>
+    <div class="item-sub">{{ exp.get('title', '') }}</div>
+    {% if exp.get('description') %}
+    <div class="item-desc">{{ exp.description }}</div>
+    {% endif %}
+  </div>
+  {% endfor %}
+</div>
+{% endif %}
+
+{% set projects = sections.get('projects', []) %}
+{% if projects %}
+<div class="section">
+  <div class="section-title">Projects</div>
+  {% for proj in projects %}
+  <div class="item">
+    <div class="item-row">
+      <span class="item-title">{{ proj.get('name', '') }}</span>
+      {% if proj.get('role') %}<span class="item-sub">{{ proj.role }}</span>{% endif %}
+    </div>
+    {% if proj.get('description') %}
+    <div class="item-desc">{{ proj.description }}</div>
+    {% endif %}
+    {% if proj.get('tech_stack') %}
+    <div class="tech">Tech: {{ proj.tech_stack | join('、') }}</div>
+    {% endif %}
+  </div>
+  {% endfor %}
+</div>
+{% endif %}
+
+{% set education = sections.get('education', []) %}
+{% if education %}
+<div class="section">
+  <div class="section-title">Education</div>
+  {% for edu in education %}
+  <div class="item">
+    <div class="item-row">
+      <span class="item-title">{{ edu.get('school', '') }}</span>
+      <span class="item-date">{{ edu.get('start', '') }} — {{ edu.get('end', '') }}</span>
+    </div>
+    <div class="item-sub">{{ edu.get('degree', '') }} · {{ edu.get('major', '') }}</div>
+  </div>
+  {% endfor %}
+</div>
+{% endif %}
+
+{% set skills = sections.get('skills', {}) %}
+{% if skills %}
+<div class="section">
+  <div class="section-title">Skills</div>
+  {% if skills.get('languages') %}
+  <div class="skills-row"><span class="skills-label">Languages：</span>{{ skills.languages | join('、') }}</div>
+  {% endif %}
+  {% if skills.get('frameworks') %}
+  <div class="skills-row"><span class="skills-label">Frameworks：</span>{{ skills.frameworks | join('、') }}</div>
+  {% endif %}
+  {% if skills.get('tools') %}
+  <div class="skills-row"><span class="skills-label">Tools：</span>{{ skills.tools | join('、') }}</div>
+  {% endif %}
+</div>
+{% endif %}
+
+</body>
+</html>

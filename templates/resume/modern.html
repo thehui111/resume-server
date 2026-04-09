@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<style>
+  @font-face {
+    font-family: "NotoSansSC";
+    src: url('../fonts/NotoSansSC-Regular.woff2') format('woff2');
+    font-weight: normal;
+    font-style: normal;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: "NotoSansSC", "PingFang SC", Arial, sans-serif;
+    font-size: 10pt;
+    color: #333;
+    line-height: 1.5;
+  }
+  .wrap { display: flex; min-height: 100vh; }
+  .sidebar {
+    width: 28%;
+    background: #f3f4f6;
+    padding: 28px 22px;
+  }
+  .main {
+    width: 72%;
+    padding: 28px 30px;
+  }
+  .name { font-size: 18pt; font-weight: 600; color: #111; margin-bottom: 4px; }
+  .role { font-size: 10pt; color: #6b7280; margin-bottom: 18px; }
+  .avatar {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    object-fit: cover;
+    margin-bottom: 10px;
+    border: 2px solid #e5e7eb;
+  }
+  .contact-item { font-size: 9pt; color: #4b5563; margin-bottom: 6px; word-break: break-all; }
+  .sidebar-section { margin-bottom: 20px; }
+  .sidebar-title {
+    font-size: 9.5pt;
+    font-weight: 700;
+    color: #374151;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 8px;
+  }
+  .skill-bar { margin-bottom: 6px; }
+  .skill-name { font-size: 9pt; color: #4b5563; margin-bottom: 2px; }
+  .skill-track { height: 5px; background: #d1d5db; border-radius: 3px; overflow: hidden; }
+  .skill-fill { height: 100%; background: #4b5563; border-radius: 3px; }
+
+  .section { margin-bottom: 16px; }
+  .section-title {
+    font-size: 11pt;
+    font-weight: 700;
+    color: #111;
+    border-bottom: 2px solid #e5e7eb;
+    padding-bottom: 4px;
+    margin-bottom: 10px;
+  }
+  .item { margin-bottom: 10px; }
+  .item-header { display: flex; justify-content: space-between; align-items: baseline; }
+  .item-title { font-weight: 600; color: #1f2937; }
+  .item-date { font-size: 9pt; color: #9ca3af; white-space: nowrap; margin-left: 8px; }
+  .item-sub { font-size: 9.5pt; color: #6b7280; margin-top: 1px; }
+  .item-desc { margin-top: 3px; color: #4b5563; white-space: pre-line; font-size: 9.5pt; }
+  .tech { font-size: 9pt; color: #6b7280; margin-top: 2px; }
+</style>
+</head>
+<body>
+
+{% set basic = sections.get('basic_info', {}) %}
+<div class="wrap">
+  <div class="sidebar">
+    {% if basic.get('avatar_url') %}
+    <img class="avatar" src="{{ basic.avatar_url }}" alt="avatar" />
+    {% endif %}
+    <div class="name">{{ basic.get('name', '') }}</div>
+    {% if basic.get('title') %}<div class="role">{{ basic.title }}</div>{% endif %}
+
+    <div class="sidebar-section">
+      <div class="sidebar-title">Contact</div>
+      {% if basic.get('email') %}<div class="contact-item">{{ basic.email }}</div>{% endif %}
+      {% if basic.get('phone') %}<div class="contact-item">{{ basic.phone }}</div>{% endif %}
+      {% if basic.get('location') %}<div class="contact-item">{{ basic.location }}</div>{% endif %}
+      {% if basic.get('github') %}<div class="contact-item">{{ basic.github }}</div>{% endif %}
+    </div>
+
+    {% set skills = sections.get('skills', {}) %}
+    {% if skills %}
+    <div class="sidebar-section">
+      <div class="sidebar-title">Skills</div>
+      {% set all_skills = (skills.get('languages', []) + skills.get('frameworks', []) + skills.get('tools', [])) %}
+      {% for s in all_skills %}
+      <div class="skill-bar">
+        <div class="skill-name">{{ s }}</div>
+        <div class="skill-track"><div class="skill-fill" style="width: {{ 60 + (loop.index0 * 7) % 35 }}%"></div></div>
+      </div>
+      {% endfor %}
+    </div>
+    {% endif %}
+
+    {% set education = sections.get('education', []) %}
+    {% if education %}
+    <div class="sidebar-section">
+      <div class="sidebar-title">Education</div>
+      {% for edu in education %}
+      <div style="margin-bottom: 8px; font-size: 9pt; color: #374151;">
+        <div style="font-weight: 600;">{{ edu.get('school', '') }}</div>
+        <div>{{ edu.get('degree', '') }} · {{ edu.get('major', '') }}</div>
+        <div style="color: #9ca3af;">{{ edu.get('start', '') }} — {{ edu.get('end', '') }}</div>
+      </div>
+      {% endfor %}
+    </div>
+    {% endif %}
+  </div>
+
+  <div class="main">
+    {% set summary = sections.get('summary', {}) %}
+    {% if summary and summary.get('text') %}
+    <div class="section">
+      <div class="section-title">个人总结</div>
+      <div class="item-desc">{{ summary.text }}</div>
+    </div>
+    {% endif %}
+
+    {% set work_exp = sections.get('work_exp', []) %}
+    {% if work_exp %}
+    <div class="section">
+      <div class="section-title">工作经历</div>
+      {% for exp in work_exp %}
+      <div class="item">
+        <div class="item-header">
+          <span class="item-title">{{ exp.get('company', '') }}</span>
+          <span class="item-date">{{ exp.get('start', '') }} — {{ exp.get('end', '至今') }}</span>
+        </div>
+        <div class="item-sub">{{ exp.get('title', '') }}</div>
+        {% if exp.get('description') %}
+        <div class="item-desc">{{ exp.description }}</div>
+        {% endif %}
+      </div>
+      {% endfor %}
+    </div>
+    {% endif %}
+
+    {% set projects = sections.get('projects', []) %}
+    {% if projects %}
+    <div class="section">
+      <div class="section-title">项目经历</div>
+      {% for proj in projects %}
+      <div class="item">
+        <div class="item-header">
+          <span class="item-title">{{ proj.get('name', '') }}</span>
+          {% if proj.get('role') %}<span class="item-sub">{{ proj.role }}</span>{% endif %}
+        </div>
+        {% if proj.get('description') %}
+        <div class="item-desc">{{ proj.description }}</div>
+        {% endif %}
+        {% if proj.get('tech_stack') %}
+        <div class="tech">技术栈：{{ proj.tech_stack | join('、') }}</div>
+        {% endif %}
+      </div>
+      {% endfor %}
+    </div>
+    {% endif %}
+  </div>
+</div>
+
+</body>
+</html>

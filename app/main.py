@@ -6,6 +6,7 @@ load_dotenv()
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
 
 from app.controller.auth_controller import router as auth_router
 from app.controller.resume_controller import router as resume_router
@@ -40,3 +41,8 @@ def on_startup():
 @app.get("/health")
 def health():
     return {"status": "ok"}
+
+
+# 生产环境挂载前端打包后的静态文件（放在所有 API 路由之后）
+if os.path.isdir("frontend/dist"):
+    app.mount("/", StaticFiles(directory="frontend/dist", html=True), name="static")
