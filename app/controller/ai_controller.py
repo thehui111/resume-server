@@ -12,7 +12,9 @@ from app.db.resume_section.resume_section_service import resume_section_service,
 from app.db.user.user_service import User
 from app.model.api_response import ApiResponse
 from app.service.ai.generate_service import stream_generate
+from app.service.ai.gemini_runner import run_gemini_text
 from app.service.ai.jd_optimize_service import stream_jd_optimize
+from app.service.ai.polish_service import polish_text
 from app.utils.error_codes import ErrorCode
 from app.utils.logger_utils import get_standard_logger
 
@@ -42,6 +44,17 @@ class JdOptimizeReq(BaseModel):
         default=None,
         description="要优化的 section 类型，不传则优化简历中所有 section",
     )
+
+
+class PolishTextReq(BaseModel):
+    text: str = Field(..., min_length=1, max_length=5000, description="需要润色的文本")
+    section_type: str = Field(default="", description="所属 section 类型（可选，用于提供上下文）")
+    field: str = Field(default="", description="所属字段名（可选）")
+
+
+class GeminiTestReq(BaseModel):
+    prompt: str = Field(..., min_length=1, description="测试提示词")
+    model: str = Field(default="gemini-2.5-pro", description="模型名称，如 gemini-2.5-pro / gemini-3.1-flash-preview")
 
 
 # ── 接口 ──────────────────────────────────────────────────────────────────
@@ -157,3 +170,34 @@ async def ai_jd_optimize(req: JdOptimizeReq, current_user: User = Depends(get_cu
             logger.warning(f"AI log 记录失败: {e}")
 
     return StreamingResponse(event_stream(), media_type="text/event-stream")
+
+
+@router.post("/polish-text", response_model=ApiResponse, summary="AI 文本润色")
+async def ai_polish_text(req: PolishTextReq, current_user: User = Depends(get_current_user)):
+    """
+    对选中的简历文本进行 AI 润色，返回 3 个版本供用户选择。
+    """
+    try:
+        variants = await polish_text(req.text, req.section_type, req.field)
+    except Exception as e:
+        logger.error(f"AI 文本润色失败: {e}")
+        return ApiResponse.fail(ErrorCode.AI_POLISH_FAILED.code, f"{ErrorCode.AI_POLISH_FAILED.message}: {str(e)}")
+
+    return ApiResponse.ok(data={"variants": variants, "original": req.text})
+
+
+@router.post("/gemini-test", response_model=ApiResponse, summary="Gemini 连通性测试")
+async def ai_gemini_test(req: GeminiTestReq, current_user: User = Depends(get_current_user)):
+    """
+    简单测试 Gemini 模型调用是否通畅，支持 gemini-2.5-pro / gemini-3.1-flash 等模型。
+    """
+    try:
+        text, usage = await run_gemini_text(
+            system_prompt="你是一个有帮助的助手。",
+            user_prompt=req.prompt,
+            model=req.model,
+        )
+        return ApiResponse.ok(data={"text": text, "usage": usage, "model": req.model})
+    except Exception as e:
+        logger.error(f"Gemini 测试失败: {e}")
+        return ApiResponse.fail(ErrorCode.AI_POLISH_FAILED.code, f"Gemini 测试失败: {str(e)}")

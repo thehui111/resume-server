@@ -1,0 +1,70 @@
+### 图片生成接口测试
+
+### Banana 生图（默认模型）
+POST http://localhost:8000/image/banana/generate
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+    "text": "一只穿着西装的卡通猫咪，白色背景，扁平插画风格",
+    "aspect_ratio": "VIDEO_ASPECT_RATIO_SQUARE",
+    "image_size": "1K",
+    "use_pro_model": false
+}
+
+###
+
+### Banana 生图（指定模型）
+POST http://localhost:8000/image/banana/generate
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+    "text": "专业证件照，白色背景，亚洲男性，正装",
+    "aspect_ratio": "VIDEO_ASPECT_RATIO_PORTRAIT",
+    "image_size": "2K",
+    "use_pro_model": true,
+    "model_name": "gemini-3.1-flash-image-preview"
+}
+
+###
+
+### Seedream 生图（默认模型）
+POST http://localhost:8000/image/seedream/generate
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+    "prompt": "未来城市夜景，霓虹灯，赛博朋克风格",
+    "model": "seedream-5-0-260128",
+    "size": "2k"
+}
+
+###
+
+### Seedream 生图（指定模型 + 参考图编辑）
+POST http://localhost:8000/image/seedream/generate
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+    "prompt": "把背景换成雪山，保持人物不变",
+    "model": "seedream-5-0",
+    "image_urls": ["https://example.com/original-avatar.jpg"],
+    "size": "3k"
+}
+
+###
+
+### 通用图片编辑（基于 prompt，不区分模型）
+POST http://localhost:8000/image/edit
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+    "prompt": "把背景换成纯白色，穿深色西装",
+    "image_url": "https://example.com/original-avatar.jpg",
+    "aspect_ratio": "VIDEO_ASPECT_RATIO_LANDSCAPE"
+}
+
+###

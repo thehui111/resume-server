@@ -1,6 +1,13 @@
 import { useState, useEffect, useRef } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
-import { detailResume, updateResume, previewResume, listTemplates } from '../api'
+import { detailResume, updateResume, previewResume, listTemplates, saveSection } from '../api'
+import DefaultTemplate from '../components/preview/DefaultTemplate'
+import ClassicTemplate from '../components/preview/ClassicTemplate'
+import CleanTemplate from '../components/preview/CleanTemplate'
+import MinimalTemplate from '../components/preview/MinimalTemplate'
+import ProfessionalTemplate from '../components/preview/ProfessionalTemplate'
+import ModernTemplate from '../components/preview/ModernTemplate'
+import CreativeTemplate from '../components/preview/CreativeTemplate'
 import BasicInfo from '../components/sections/BasicInfo'
 import Summary from '../components/sections/Summary'
 import WorkExp from '../components/sections/WorkExp'
@@ -19,6 +26,18 @@ const SECTION_LIST = [
   { key: 'skills', label: '技能' },
   { key: 'projects', label: '项目经历' },
 ]
+
+const FRONTEND_TEMPLATES = new Set(['default.html', 'classic.html', 'clean.html', 'minimal.html', 'professional.html', 'modern.html', 'creative.html'])
+
+const TEMPLATE_COMPONENTS = {
+  'default.html': DefaultTemplate,
+  'classic.html': ClassicTemplate,
+  'clean.html': CleanTemplate,
+  'minimal.html': MinimalTemplate,
+  'professional.html': ProfessionalTemplate,
+  'modern.html': ModernTemplate,
+  'creative.html': CreativeTemplate,
+}
 
 export default function ResumeEditor() {
   const { id } = useParams()
@@ -40,6 +59,7 @@ export default function ResumeEditor() {
   const [previewHtml, setPreviewHtml] = useState('')
   const [previewTemplate, setPreviewTemplate] = useState('default.html')
   const [previewLoading, setPreviewLoading] = useState(false)
+  const [previewEditMode, setPreviewEditMode] = useState(false)
   const [templates, setTemplates] = useState([])
   const [splitPct, setSplitPct] = useState(50)
   const containerRef = useRef(null)
@@ -62,12 +82,17 @@ export default function ResumeEditor() {
 
   useEffect(() => {
     if (!showPreview) return
+    if (FRONTEND_TEMPLATES.has(previewTemplate)) {
+      setPreviewHtml('')
+      setPreviewLoading(false)
+      return
+    }
     setPreviewLoading(true)
     previewResume(resumeId, previewTemplate)
       .then(html => setPreviewHtml(html))
       .catch(() => {})
       .finally(() => setPreviewLoading(false))
-  }, [showPreview, previewTemplate])
+  }, [showPreview, previewTemplate, resumeId])
 
   function onDividerMouseDown(e) {
     e.preventDefault()
@@ -88,6 +113,7 @@ export default function ResumeEditor() {
   }
 
   function refreshPreview() {
+    if (FRONTEND_TEMPLATES.has(previewTemplate)) return
     setPreviewLoading(true)
     previewResume(resumeId, previewTemplate)
       .then(html => setPreviewHtml(html))
@@ -105,13 +131,33 @@ export default function ResumeEditor() {
 
   function handleSectionSaved(type, content) {
     setSections(prev => ({ ...prev, [type]: content }))
-    if (showPreview) refreshPreview()
+    if (showPreview && !FRONTEND_TEMPLATES.has(previewTemplate)) refreshPreview()
   }
 
   // 弹窗回调：AI 生成/JD 优化的每个 section 实时更新
   function handleSectionFromModal(type, content) {
     setSections(prev => ({ ...prev, [type]: content }))
-    if (showPreview) refreshPreview()
+    if (showPreview && !FRONTEND_TEMPLATES.has(previewTemplate)) refreshPreview()
+  }
+
+  // ESC exits preview edit mode
+  useEffect(() => {
+    if (!previewEditMode) return
+    function onKey(e) {
+      if (e.key === 'Escape') setPreviewEditMode(false)
+    }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [previewEditMode])
+
+  async function handlePreviewEdit(type, content) {
+    setSections(prev => ({ ...prev, [type]: content }))
+    try {
+      await saveSection(resumeId, type, content, 0)
+      // silently saved
+    } catch (e) {
+      // Optionally show toast; here we ignore
+    }
   }
 
   if (loading) {
@@ -123,6 +169,8 @@ export default function ResumeEditor() {
   }
 
   const existingSectionKeys = Object.keys(sections)
+  const isFrontendPreview = FRONTEND_TEMPLATES.has(previewTemplate)
+  const PreviewComponent = TEMPLATE_COMPONENTS[previewTemplate]
 
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col">
@@ -249,12 +297,15 @@ export default function ResumeEditor() {
         {showPreview && (
           <div className="flex flex-col bg-gray-100 overflow-hidden" style={{ width: `${100 - splitPct}%` }}>
             {/* Preview toolbar */}
-            <div className="flex items-center justify-between px-4 py-2 bg-white border-b border-gray-200 flex-shrink-0">
+            <div className="flex items-center justify-between px-4 py-2 bg-white border-b border-gray-200 flex-shrink-0 gap-2">
               <span className="text-sm font-medium text-gray-700">实时预览</span>
               <div className="flex items-center gap-2">
                 <select
                   value={previewTemplate}
-                  onChange={e => setPreviewTemplate(e.target.value)}
+                  onChange={e => {
+                    setPreviewTemplate(e.target.value)
+                    setPreviewEditMode(false)
+                  }}
                   className="text-xs border border-gray-300 rounded-md px-2 py-1 text-gray-600 focus:outline-none focus:border-indigo-400"
                 >
                   <option value="default.html">简约</option>
@@ -262,23 +313,53 @@ export default function ResumeEditor() {
                     <option key={t.file_name} value={t.file_name}>{t.name}</option>
                   ))}
                 </select>
-                <button
-                  onClick={refreshPreview}
-                  disabled={previewLoading}
-                  className="text-xs text-indigo-600 hover:text-indigo-800 disabled:opacity-40 px-2 py-1 rounded border border-indigo-200 hover:bg-indigo-50 transition-colors"
-                >
-                  {previewLoading ? '刷新中...' : '刷新'}
-                </button>
+
+                {isFrontendPreview && (
+                  <button
+                    onClick={() => setPreviewEditMode(v => !v)}
+                    className={`text-xs px-2 py-1 rounded border transition-colors ${
+                      previewEditMode
+                        ? 'border-indigo-500 bg-indigo-50 text-indigo-700'
+                        : 'border-gray-300 text-gray-700 hover:bg-gray-50'
+                    }`}
+                  >
+                    {previewEditMode ? '退出编辑' : '编辑预览'}
+                  </button>
+                )}
+
+                {!isFrontendPreview && (
+                  <button
+                    onClick={refreshPreview}
+                    disabled={previewLoading}
+                    className="text-xs text-indigo-600 hover:text-indigo-800 disabled:opacity-40 px-2 py-1 rounded border border-indigo-200 hover:bg-indigo-50 transition-colors"
+                  >
+                    {previewLoading ? '刷新中...' : '刷新'}
+                  </button>
+                )}
               </div>
             </div>
-            {/* Preview iframe */}
+            {/* Preview content */}
             <div className="flex-1 overflow-hidden relative">
               {previewLoading && (
                 <div className="absolute inset-0 bg-white/70 flex items-center justify-center z-10">
                   <span className="text-sm text-gray-400">加载中...</span>
                 </div>
               )}
-              {previewHtml ? (
+
+              {isFrontendPreview && PreviewComponent ? (
+                <div
+                  className="w-full h-full overflow-auto bg-white relative"
+                  data-preview-container
+                  onDoubleClick={() => setPreviewEditMode(true)}
+                >
+                  {previewEditMode && (
+                    <div className="sticky top-0 z-20 bg-indigo-600 text-white text-xs text-center py-1.5 font-medium">
+                      编辑模式 — 点击文字直接修改，按 Esc 退出
+                    </div>
+                  )}
+                  <PreviewComponent sections={sections} editable={previewEditMode} onEdit={handlePreviewEdit} />
+                </div>
+              ) : previewHtml ? (
                 <iframe
                   srcDoc={previewHtml}
                   className="w-full h-full border-none bg-white"

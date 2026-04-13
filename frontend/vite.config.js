@@ -9,6 +9,8 @@ export default defineConfig({
       '/auth': 'http://localhost:8312',
       '^/resume/': 'http://localhost:8312',
       '/ai': 'http://localhost:8312',
+      '/avatar': 'http://localhost:8312',
+      '/image': 'http://localhost:8312',
     },
     historyApiFallback: true,
   },

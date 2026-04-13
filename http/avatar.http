@@ -1,0 +1,44 @@
+### 头像相关接口测试
+
+### AI 优化头像
+POST http://localhost:8000/avatar/optimize
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+    "image_url": "https://example.com/original-avatar.jpg"
+}
+
+# Response:
+# {
+#     "success": true,
+#     "code": 0,
+#     "message": "ok",
+#     "data": {
+#         "image_url": "https://oss.example.com/resume-avatars/xxx/optimized.jpg"
+#     }
+# }
+
+###
+
+### 修改头像背景色
+POST http://localhost:8000/avatar/change-background
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+    "image_url": "https://example.com/original-avatar.jpg",
+    "background_color": "lightblue"
+}
+
+# Response:
+# {
+#     "success": true,
+#     "code": 0,
+#     "message": "ok",
+#     "data": {
+#         "image_url": "https://oss.example.com/resume-avatars/xxx/bg-changed.jpg"
+#     }
+# }
+
+###

@@ -30,12 +30,12 @@ export default function Summary({ resumeId, data, onSaved }) {
         rows={5}
         value={text}
         onChange={e => setText(e.target.value)}
-        placeholder="简洁描述你的核心竞争力，突出最匹配目标职位的经验和能力，不超过 80 字..."
+        placeholder="简洁描述你的核心竞争力，突出最匹配目标职位的经验和能力，建议不超过 120 字..."
         className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 resize-none"
       />
       <div className="flex items-center justify-between mt-2">
-        <span className={`text-xs ${text.length > 80 ? 'text-red-500' : 'text-gray-400'}`}>
-          {text.length} / 80 字
+        <span className={`text-xs ${text.length > 120 ? 'text-red-500' : 'text-gray-400'}`}>
+          {text.length} / 120 字（建议简短个人总结）
         </span>
         <button
           onClick={handleSave}

@@ -128,6 +128,73 @@ export async function uploadAvatar(file) {
   return json.data.url
 }
 
+// ── Avatar AI ─────────────────────────────────────────────────────────────
+export async function optimizeAvatar(image_url) {
+  const res = await fetch('/avatar/optimize', {
+    method: 'POST',
+    headers: authHeaders(),
+    body: JSON.stringify({ image_url }),
+  })
+  if (res.status === 401) { handleUnauthorized(); throw new Error('登录已过期') }
+  const json = await res.json()
+  if (json.code !== 0) throw new Error(json.message || '优化失败')
+  return json.data.image_url
+}
+
+export async function changeAvatarBackground(image_url, background_color) {
+  const res = await fetch('/avatar/change-background', {
+    method: 'POST',
+    headers: authHeaders(),
+    body: JSON.stringify({ image_url, background_color }),
+  })
+  if (res.status === 401) { handleUnauthorized(); throw new Error('登录已过期') }
+  const json = await res.json()
+  if (json.code !== 0) throw new Error(json.message || '修改背景失败')
+  return json.data.image_url
+}
+
+// ── Image Generation / Edit ───────────────────────────────────────────────
+export async function bananaGenerateImage(data) {
+  const res = await fetch('/image/banana/generate', {
+    method: 'POST',
+    headers: authHeaders(),
+    body: JSON.stringify(data),
+  })
+  if (res.status === 401) { handleUnauthorized(); throw new Error('登录已过期') }
+  const json = await res.json()
+  if (json.code !== 0) throw new Error(json.message || 'Banana 生图失败')
+  return json.data.image_url
+}
+
+export async function seedreamGenerateImage(data) {
+  const res = await fetch('/image/seedream/generate', {
+    method: 'POST',
+    headers: authHeaders(),
+    body: JSON.stringify(data),
+  })
+  if (res.status === 401) { handleUnauthorized(); throw new Error('登录已过期') }
+  const json = await res.json()
+  if (json.code !== 0) throw new Error(json.message || 'Seedream 生图失败')
+  return json.data.image_url
+}
+
+export async function editImageByPrompt(prompt, image_url, aspect_ratio = 'VIDEO_ASPECT_RATIO_LANDSCAPE') {
+  const res = await fetch('/image/edit', {
+    method: 'POST',
+    headers: authHeaders(),
+    body: JSON.stringify({ prompt, image_url, aspect_ratio }),
+  })
+  if (res.status === 401) { handleUnauthorized(); throw new Error('登录已过期') }
+  const json = await res.json()
+  if (json.code !== 0) throw new Error(json.message || '图片编辑失败')
+  return json.data.image_url
+}
+
+// ── AI 文本润色 ───────────────────────────────────────────────────────────
+export async function polishText(text, section_type = '', field = '') {
+  return request('POST', '/ai/polish-text', { text, section_type, field })
+}
+
 // ── 预览 ──────────────────────────────────────────────────────────────────
 export async function previewResume(resume_id, template_name = 'default.html') {
   const res = await fetch(`/resume/${resume_id}/preview?template_name=${template_name}`, {

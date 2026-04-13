@@ -1,6 +1,7 @@
 import os
 import time
 
+import httpx
 import oss2
 
 from app.utils.logger_utils import get_standard_logger
@@ -52,3 +53,21 @@ def upload_image(image_data: bytes, ext: str, user_id: str) -> str:
     url = f"https://{bucket_name}.{endpoint}/{file_key}"
     logger.info(f"[oss] 图片上传成功: {url}")
     return url
+
+
+async def download_and_upload_to_oss(image_url: str, user_id: str) -> str:
+    """下载远程图片并上传到自有 OSS"""
+    async with httpx.AsyncClient(timeout=30.0) as client:
+        resp = await client.get(image_url)
+        if resp.status_code != 200:
+            raise Exception(f"下载图片失败: HTTP {resp.status_code}")
+        image_data = resp.content
+
+    ext = "jpg"
+    content_type = resp.headers.get("content-type", "")
+    if "png" in content_type:
+        ext = "png"
+    elif "webp" in content_type:
+        ext = "webp"
+
+    return upload_image(image_data, ext, user_id)

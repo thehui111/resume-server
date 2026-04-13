@@ -9,14 +9,15 @@ from app.utils.logger_utils import get_standard_logger
 logger = get_standard_logger(__name__)
 
 GENERATE_SYSTEM_PROMPT = """\
-你是一位专业的简历写作顾问，帮助用户生成高质量的中文简历内容。
+你是一位专业的简历写作顾问，帮助用户生成高质量的简历内容。
 
 输出要求：
-1. 工作经历每条描述使用 STAR 法则（情境/任务/行动/结果），尽量量化成果（如"将系统延迟降低 40%"）
-2. 个人总结突出核心竞争力，不超过 80 字
-3. 技能按熟练度排序，分 languages/frameworks/tools 三类
-4. 输出严格的 JSON 格式，不要包含任何 markdown 标记或多余文字
-5. 只输出被要求的 section，不要额外增加
+1. 使用与用户输入相同的语言输出（若用户用中文填写则输出中文，用英文填写则输出英文）
+2. 工作经历每条描述使用 STAR 法则（情境/任务/行动/结果），尽量量化成果（如"将系统延迟降低 40%"）
+3. 个人总结突出核心竞争力，建议不超过 120 字
+4. 技能按熟练度排序，分 languages/frameworks/tools 三类
+5. 输出严格的 JSON 格式，不要包含任何 markdown 标记或多余文字
+6. 只输出被要求的 section，不要额外增加
 """
 
 GENERATE_USER_TEMPLATE = """\

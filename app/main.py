@@ -9,6 +9,8 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 
 from app.controller.auth_controller import router as auth_router
+from app.controller.avatar_controller import router as avatar_router
+from app.controller.image_controller import router as image_router
 from app.controller.resume_controller import router as resume_router
 from app.controller.ai_controller import router as ai_router
 from app.db.database import create_db_and_tables
@@ -31,6 +33,8 @@ app.add_middleware(
 app.include_router(auth_router)
 app.include_router(resume_router)
 app.include_router(ai_router)
+app.include_router(avatar_router)
+app.include_router(image_router)
 
 
 @app.on_event("startup")
